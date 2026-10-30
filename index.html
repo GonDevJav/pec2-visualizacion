@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEC 2 - Técnicas de Visualización de Datos</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-2.32.0.min.js"></script>
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .chart-container {
+            width: 100%;
+            min-height: 480px;
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-dark bg-dark mb-4">
+        <div class="container">
+            <span class="navbar-brand mb-0 h1">Visualización de Datos · PEC 2</span>
+            <span class="text-white-50 small">Gonzalo Gutiérrez Chozas</span>
+        </div>
+    </nav>
+
+    <div class="container mb-5">
+
+        <!-- Mensaje de estado de carga -->
+        <div id="alerta-estado" class="alert alert-info py-2" role="alert">
+            Cargando datos desde los archivos JSON locales...
+        </div>
+
+        <!-- 1. PIE CHART -->
+        <div class="card shadow-sm mb-4" id="pie-chart">
+            <div class="card-header bg-white py-3">
+                <span class="text-muted text-uppercase fw-bold small">Grupo I: Técnica básica</span>
+                <h2 class="h5 mb-0 mt-1">1. Mix de generación eléctrica en España (2025) - Gráfico de sectores</h2>
+            </div>
+            <div class="card-body">
+                <div class="bg-light p-3 rounded mb-3 small">
+                    <p class="mb-1"><strong>Fuente:</strong> <code>data/estructura-generacion.json</code> (Red Eléctrica de España, REData 2025). Sumatorio total anual: 272.321 GWh.</p>
+                    <p class="mb-1"><strong>Enlace:</strong> <a href="https://www.ree.es/es/datos/generacion/estructura-generacion">https://www.ree.es/es/datos/generacion/estructura-generacion</a></p>
+                    <p class="mb-0"><strong>Comentario:</strong> Para representar proporciones de un total, el gráfico circular funciona bien cuando el número de porciones es reducido. Como el dataset original desglosa hasta 16 tecnologías distintas (lo que provocaría sectores diminutos imposibles de comparar a simple vista), he mantenido las 5 tecnologías con mayor cuota y he agrupado las 11 restantes en una categoría de "Otras tecnologías". Se aprecia claramente que la energía eólica, nuclear y fotovoltaica cubren prácticamente el 60% de la demanda generada.</p>
+                </div>
+
+                <div class="row align-items-center mb-3">
+                    <div class="col-auto">
+                        <label for="filtro-pie" class="col-form-label fw-semibold small">Mostrar:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="filtro-pie" class="form-select form-select-sm">
+                            <option value="top6" selected>Top 5 tecnologías + Resto agrupado (Recomendado)</option>
+                            <option value="todas">Desglose completo con las 16 tecnologías</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="grafico-pie" class="chart-container"></div>
+            </div>
+        </div>
+
+        <!-- 2. SMALL MULTIPLES -->
+        <div class="card shadow-sm mb-4" id="small-multiples">
+            <div class="card-header bg-white py-3">
+                <span class="text-muted text-uppercase fw-bold small">Grupo II: Técnica habitual</span>
+                <h2 class="h5 mb-0 mt-1">2. Evolución del desempleo por Comunidades Autónomas (2021-2023) - Small Multiples</h2>
+            </div>
+            <div class="card-body">
+                <div class="bg-light p-3 rounded mb-3 small">
+                    <p class="mb-1"><strong>Fuente:</strong> <code>data/4247.json</code> (INE, Encuesta de Población Activa - EPA, trimestres 2021-T1 a 2023-T4).</p>
+                    <p class="mb-1"><strong>Enlace:</strong> <a href="https://www.ine.es/jaxiT3/Datos.htm?t=4247">https://www.ine.es/jaxiT3/Datos.htm?t=4247</a></p>
+                    <p class="mb-0"><strong>Comentario:</strong> Al comparar series temporales de muchas regiones a la vez, meter todas las líneas en un único gráfico genera el típico "gráfico de espagueti" donde no se distingue nada. Utilizando una rejilla de múltiplos pequeños (Small Multiples) con la misma escala fija en el eje Y (del 0% al 30%), se pueden comparar tendencias en paralelo. La línea discontinua gris muestra la media nacional como referencia. Destaca la bajada del paro en Canarias tras la recuperación del turismo, la fuerte estacionalidad de Baleares (dientes de sierra entre verano e invierno) y la estabilidad de Madrid y País Vasco con tasas muy por debajo de la media.</p>
+                </div>
+
+                <div class="row align-items-center mb-3">
+                    <div class="col-auto">
+                        <label for="filtro-sm" class="col-form-label fw-semibold small">Regiones:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="filtro-sm" class="form-select form-select-sm">
+                            <option value="8" selected>8 Comunidades representativas</option>
+                            <option value="17">Las 17 Comunidades Autónomas</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="grafico-sm" class="chart-container"></div>
+            </div>
+        </div>
+
+        <!-- 3. BEESWARM CHART -->
+        <div class="card shadow-sm mb-4" id="beeswarm-chart">
+            <div class="card-header bg-white py-3">
+                <span class="text-muted text-uppercase fw-bold small">Grupo III: Técnica específica</span>
+                <h2 class="h5 mb-0 mt-1">3. Distribución de la renta neta media por persona en municipios (2024) - Beeswarm Plot</h2>
+            </div>
+            <div class="card-body">
+                <div class="bg-light p-3 rounded mb-3 small">
+                    <p class="mb-1"><strong>Fuente:</strong> <code>data/30824.json</code> (INE, Atlas de Distribución de Renta de los Hogares, 2024).</p>
+                    <p class="mb-1"><strong>Enlace:</strong> <a href="https://www.ine.es/jaxiT3/Datos.htm?t=30824">https://www.ine.es/jaxiT3/Datos.htm?t=30824</a></p>
+                    <p class="mb-0"><strong>Comentario:</strong> El dataset oficial del INE contiene los 8.139 municipios de España. De ellos, 8.052 cuentan con datos numéricos de renta y 6.713 disponen de una cifra individual propia (excluyendo secretos estadísticos y municipios de menos de 100 habitantes a los que se imputa la media comarcal agrupada). Para evitar el solapamiento masivo de miles de puntos en el Beeswarm Plot, se realiza un muestreo regular de puntos a lo largo de toda la distribución ordenada que conserva los extremos reales (mínimos y máximos) y preserva el perfil de densidad y concentración central de cada zona geográfica.</p>
+                </div>
+
+                <div class="row align-items-center mb-3">
+                    <div class="col-auto">
+                        <label for="filtro-bee" class="col-form-label fw-semibold small">Tamaño de la muestra:</label>
+                    </div>
+                    <div class="col-auto">
+                        <select id="filtro-bee" class="form-select form-select-sm">
+                            <option value="50">200 municipios (50 por zona)</option>
+                            <option value="60" selected>240 municipios (60 por zona)</option>
+                            <option value="100">400 municipios (100 por zona)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="grafico-bee" class="chart-container"></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Script de datos y gráficos -->
+    <script>
+        let datosGeneracion = [];
+        let datosParo = {};
+        let datosRenta = [];
+
+        const provincias = {
+            '01': { prov: 'Álava', ccaa: 'País Vasco', zona: 'Norte' },
+            '02': { prov: 'Albacete', ccaa: 'Castilla-La Mancha', zona: 'Centro y Madrid' },
+            '03': { prov: 'Alicante', ccaa: 'Comunidad Valenciana', zona: 'Este y Mediterráneo' },
+            '04': { prov: 'Almería', ccaa: 'Andalucía', zona: 'Sur y Canarias' },
+            '05': { prov: 'Ávila', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '06': { prov: 'Badajoz', ccaa: 'Extremadura', zona: 'Centro y Madrid' },
+            '07': { prov: 'Baleares', ccaa: 'Baleares', zona: 'Este y Mediterráneo' },
+            '08': { prov: 'Barcelona', ccaa: 'Cataluña', zona: 'Este y Mediterráneo' },
+            '09': { prov: 'Burgos', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '10': { prov: 'Cáceres', ccaa: 'Extremadura', zona: 'Centro y Madrid' },
+            '11': { prov: 'Cádiz', ccaa: 'Andalucía', zona: 'Sur y Canarias' },
+            '12': { prov: 'Castellón', ccaa: 'Comunidad Valenciana', zona: 'Este y Mediterráneo' },
+            '13': { prov: 'Ciudad Real', ccaa: 'Castilla-La Mancha', zona: 'Centro y Madrid' },
+            '14': { prov: 'Córdoba', ccaa: 'Andalucía', zona: 'Sur y Canarias' },
+            '15': { prov: 'A Coruña', ccaa: 'Galicia', zona: 'Norte' },
+            '16': { prov: 'Cuenca', ccaa: 'Castilla-La Mancha', zona: 'Centro y Madrid' },
+            '17': { prov: 'Girona', ccaa: 'Cataluña', zona: 'Este y Mediterráneo' },
+            '18': { prov: 'Granada', ccaa: 'Andalucía', zona: 'Sur y Canarias' },
+            '19': { prov: 'Guadalajara', ccaa: 'Castilla-La Mancha', zona: 'Centro y Madrid' },
+            '20': { prov: 'Gipuzkoa', ccaa: 'País Vasco', zona: 'Norte' },
+            '21': { prov: 'Huelva', ccaa: 'Andalucía', zona: 'Sur y Canarias' },
+            '22': { prov: 'Huesca', ccaa: 'Aragón', zona: 'Este y Mediterráneo' },
+            '23': { prov: 'Jaén', ccaa: 'Andalucía', zona: 'Sur y Canarias' },
+            '24': { prov: 'León', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '25': { prov: 'Lleida', ccaa: 'Cataluña', zona: 'Este y Mediterráneo' },
+            '26': { prov: 'La Rioja', ccaa: 'La Rioja', zona: 'Norte' },
+            '27': { prov: 'Lugo', ccaa: 'Galicia', zona: 'Norte' },
+            '28': { prov: 'Madrid', ccaa: 'Madrid', zona: 'Centro y Madrid' },
+            '29': { prov: 'Málaga', ccaa: 'Andalucía', zona: 'Sur y Canarias' },
+            '30': { prov: 'Murcia', ccaa: 'Murcia', zona: 'Este y Mediterráneo' },
+            '31': { prov: 'Navarra', ccaa: 'Navarra', zona: 'Norte' },
+            '32': { prov: 'Ourense', ccaa: 'Galicia', zona: 'Norte' },
+            '33': { prov: 'Asturias', ccaa: 'Asturias', zona: 'Norte' },
+            '34': { prov: 'Palencia', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '35': { prov: 'Las Palmas', ccaa: 'Canarias', zona: 'Sur y Canarias' },
+            '36': { prov: 'Pontevedra', ccaa: 'Galicia', zona: 'Norte' },
+            '37': { prov: 'Salamanca', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '38': { prov: 'Santa Cruz de Tenerife', ccaa: 'Canarias', zona: 'Sur y Canarias' },
+            '39': { prov: 'Cantabria', ccaa: 'Cantabria', zona: 'Norte' },
+            '40': { prov: 'Segovia', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '41': { prov: 'Sevilla', ccaa: 'Andalucía', zona: 'Sur y Canarias' },
+            '42': { prov: 'Soria', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '43': { prov: 'Tarragona', ccaa: 'Cataluña', zona: 'Este y Mediterráneo' },
+            '44': { prov: 'Teruel', ccaa: 'Aragón', zona: 'Este y Mediterráneo' },
+            '45': { prov: 'Toledo', ccaa: 'Castilla-La Mancha', zona: 'Centro y Madrid' },
+            '46': { prov: 'Valencia', ccaa: 'Comunidad Valenciana', zona: 'Este y Mediterráneo' },
+            '47': { prov: 'Valladolid', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '48': { prov: 'Bizkaia', ccaa: 'País Vasco', zona: 'Norte' },
+            '49': { prov: 'Zamora', ccaa: 'Castilla y León', zona: 'Centro y Madrid' },
+            '50': { prov: 'Zaragoza', ccaa: 'Aragón', zona: 'Este y Mediterráneo' },
+            '51': { prov: 'Ceuta', ccaa: 'Ceuta', zona: 'Sur y Canarias' },
+            '52': { prov: 'Melilla', ccaa: 'Melilla', zona: 'Sur y Canarias' }
+        };
+
+        async function cargarJson(archivo) {
+            let res = await fetch('data/' + archivo);
+            if (!res.ok) {
+                res = await fetch(archivo);
+            }
+            if (!res.ok) {
+                throw new Error('Error al cargar ' + archivo);
+            }
+            return await res.json();
+        }
+
+        // 1. Gráfico de tarta
+        function dibujarPie(modo) {
+            let etiquetas = [];
+            let valores = [];
+            let colores = [];
+
+            if (modo === 'top6') {
+                const top5 = datosGeneracion.slice(0, 5);
+                const resto = datosGeneracion.slice(5);
+                const sumaResto = resto.reduce((acc, el) => acc + el.gwh, 0);
+
+                etiquetas = top5.map(d => d.nombre).concat(['Otras tecnologías']);
+                valores = top5.map(d => Math.round(d.gwh)).concat([Math.round(sumaResto)]);
+                colores = top5.map(d => d.color).concat(['#6c757d']);
+            } else {
+                etiquetas = datosGeneracion.map(d => d.nombre);
+                valores = datosGeneracion.map(d => Math.round(d.gwh));
+                colores = datosGeneracion.map(d => d.color);
+            }
+
+            const data = [{
+                type: 'pie',
+                labels: etiquetas,
+                values: valores,
+                textinfo: modo === 'top6' ? 'label+percent' : 'percent',
+                textposition: 'outside',
+                automargin: true,
+                marker: {
+                    colors: colores,
+                    line: { color: '#ffffff', width: 1.5 }
+                },
+                hovertemplate: '%{label}: <b>%{value:,.0f} GWh</b> (%{percent})<extra></extra>'
+            }];
+
+            const layout = {
+                title: { text: 'Generación por fuente (GWh y %)', font: { size: 15 } },
+                showlegend: true,
+                legend: { orientation: 'h', y: -0.1 },
+                margin: { t: 40, b: 40, l: 30, r: 30 }
+            };
+
+            Plotly.react('grafico-pie', data, layout, { responsive: true });
+        }
+
+        // 2. Gráfico de Small Multiples
+        function dibujarSmallMultiples(opcion) {
+            const periodos = ['2021-T1', '2021-T2', '2021-T3', '2021-T4', '2022-T1', '2022-T2', '2022-T3', '2022-T4', '2023-T1', '2023-T2', '2023-T3', '2023-T4'];
+            
+            const lista8 = ['Andalucía', 'Canarias', 'Extremadura', 'Comunitat Valenciana', 'Balears, Illes', 'Madrid, Comunidad de', 'Cataluña', 'País Vasco'];
+            // Las 17 Comunidades Autónomas completas (incluyendo Aragón)
+            const lista17 = [
+                'Andalucía', 'Aragón', 'Asturias, Principado de', 'Balears, Illes',
+                'Canarias', 'Cantabria', 'Castilla y León', 'Castilla - La Mancha',
+                'Cataluña', 'Comunitat Valenciana', 'Extremadura', 'Galicia',
+                'Madrid, Comunidad de', 'Murcia, Región de', 'Navarra, Comunidad Foral de', 'País Vasco',
+                'Rioja, La'
+            ];
+            
+            const seleccion = opcion === '8' ? lista8 : lista17;
+            const filas = opcion === '8' ? 2 : 5;
+            const cols = 4;
+
+            const mediaNacional = periodos.map(p => datosParo['Total Nacional'] ? datosParo['Total Nacional'][p] : null);
+            const traces = [];
+            const layout = {
+                title: { text: 'Tasa de paro trimestral (%) con eje fijo (0 - 30%)', font: { size: 15 } },
+                grid: { rows: filas, columns: cols, pattern: 'independent' },
+                showlegend: false,
+                margin: { t: 60, b: 40, l: 40, r: 20 },
+                annotations: []
+            };
+
+            seleccion.forEach((ccaa, idx) => {
+                const subId = idx === 0 ? '' : (idx + 1);
+                const serieCcaa = periodos.map(p => datosParo[ccaa] ? datosParo[ccaa][p] : null);
+                const nombreLimpio = ccaa.replace(', Comunidad de', '').replace(', Principado de', '').replace(', Región de', '').replace(', Comunidad Foral de', '');
+
+                // Línea gris de referencia nacional
+                traces.push({
+                    x: periodos,
+                    y: mediaNacional,
+                    xaxis: 'x' + subId,
+                    yaxis: 'y' + subId,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: { color: '#adb5bd', width: 1.5, dash: 'dot' },
+                    hoverinfo: 'none'
+                });
+
+                // Línea de la comunidad
+                traces.push({
+                    x: periodos,
+                    y: serieCcaa,
+                    xaxis: 'x' + subId,
+                    yaxis: 'y' + subId,
+                    type: 'scatter',
+                    mode: 'lines+markers',
+                    name: nombreLimpio,
+                    fill: 'tozeroy',
+                    fillcolor: 'rgba(13, 110, 253, 0.1)',
+                    line: { color: '#0d6efd', width: 2 },
+                    marker: { size: 4 },
+                    hovertemplate: nombreLimpio + '<br>%{x}: <b>%{y:.1f}%</b><extra></extra>'
+                });
+
+                layout['xaxis' + subId] = {
+                    tickvals: ['2021-T1', '2022-T1', '2023-T1', '2023-T4'],
+                    ticktext: ['21', '22', '23', '23-T4'],
+                    tickfont: { size: 9 },
+                    zeroline: false
+                };
+                layout['yaxis' + subId] = {
+                    range: [0, 30],
+                    ticksuffix: '%',
+                    tickfont: { size: 9 },
+                    zeroline: false
+                };
+
+                layout.annotations.push({
+                    text: nombreLimpio,
+                    xref: 'x' + subId + ' domain',
+                    yref: 'y' + subId + ' domain',
+                    x: 0.5,
+                    y: 1.12,
+                    showarrow: false,
+                    font: { size: 11, color: '#212529' }
+                });
+            });
+
+            document.getElementById('grafico-sm').style.minHeight = opcion === '8' ? '540px' : '1050px';
+            Plotly.react('grafico-sm', traces, layout, { responsive: true });
+        }
+
+        // Separación vertical de puntos evitando solapamiento (beeswarm)
+        function calcularDispersion(puntos, margenX, pasoY) {
+            const ordenados = [...puntos].sort((a, b) => a.valor - b.valor);
+            const colocados = [];
+
+            ordenados.forEach(punto => {
+                let posY = 0;
+                let nivel = 0;
+                while (true) {
+                    const intentos = nivel === 0 ? [0] : [nivel * pasoY, -nivel * pasoY];
+                    let libre = false;
+                    for (const offset of intentos) {
+                        const haySolape = colocados.some(c => {
+                            const dx = (punto.valor - c.valor) / margenX;
+                            const dy = (offset - c.y) / pasoY;
+                            return (dx * dx + dy * dy) < 0.9;
+                        });
+                        if (!haySolape) {
+                            posY = offset;
+                            libre = true;
+                            break;
+                        }
+                    }
+                    if (libre || nivel > 15) break;
+                    nivel++;
+                }
+                punto.y = posY;
+                colocados.push(punto);
+            });
+            return colocados;
+        }
+
+        // 3. Gráfico Beeswarm
+        function dibujarBeeswarm(porGrupo) {
+            const zonas = ['Norte', 'Centro y Madrid', 'Este y Mediterráneo', 'Sur y Canarias'];
+            const colores = {
+                'Norte': '#0dcaf0',
+                'Centro y Madrid': '#0d6efd',
+                'Este y Mediterráneo': '#198754',
+                'Sur y Canarias': '#dc3545'
+            };
+
+            const traces = [];
+
+            zonas.forEach((zona, idx) => {
+                const municipiosZona = datosRenta
+                    .filter(m => m.zona === zona)
+                    .sort((a, b) => a.valor - b.valor);
+
+                const total = municipiosZona.length;
+                if (total === 0) return;
+
+                // Selección de puntos distribuidos a lo largo de la distribución ordenada
+                const muestra = [];
+                for (let i = 0; i < porGrupo; i++) {
+                    const index = Math.round((i * (total - 1)) / (porGrupo - 1));
+                    muestra.push({ ...municipiosZona[index] });
+                }
+
+                const separados = calcularDispersion(muestra, 450, 0.075);
+
+                traces.push({
+                    type: 'scatter',
+                    mode: 'markers',
+                    name: zona,
+                    x: separados.map(m => m.valor),
+                    y: separados.map(m => idx + m.y),
+                    text: separados.map(m => m.nombre + ' (' + m.prov + ')<br>Renta: <b>' + m.valor.toLocaleString('es-ES') + ' €</b>'),
+                    hoverinfo: 'text',
+                    marker: {
+                        size: 8,
+                        color: colores[zona],
+                        opacity: 0.85,
+                        line: { color: '#ffffff', width: 0.8 }
+                    }
+                });
+            });
+
+            const layout = {
+                title: { text: 'Renta neta media por persona (€/año) por zonas', font: { size: 15 } },
+                xaxis: {
+                    title: 'Renta neta media por persona (€)',
+                    ticksuffix: ' €',
+                    range: [7000, 34000],
+                    gridcolor: '#e9ecef'
+                },
+                yaxis: {
+                    tickvals: [0, 1, 2, 3],
+                    ticktext: zonas,
+                    range: [-0.6, 3.6],
+                    zeroline: false
+                },
+                legend: { orientation: 'h', y: -0.15 },
+                margin: { t: 50, b: 60, l: 150, r: 30 },
+                hovermode: 'closest'
+            };
+
+            Plotly.react('grafico-bee', traces, layout, { responsive: true });
+        }
+
+        // Carga inicial al abrir la página
+        async function iniciar() {
+            const alerta = document.getElementById('alerta-estado');
+            try {
+                // 1. Cargar electricidad
+                const jsonGen = await cargarJson('estructura-generacion.json');
+                datosGeneracion = jsonGen.included
+                    .filter(item => item.attributes.title !== 'Generación total')
+                    .map(item => {
+                        const totalMwh = item.attributes.values.reduce((s, v) => s + (v.value || 0), 0);
+                        return {
+                            nombre: item.attributes.title,
+                            color: item.attributes.color || '#6c757d',
+                            gwh: totalMwh / 1000.0
+                        };
+                    })
+                    .sort((a, b) => b.gwh - a.gwh);
+
+                // 2. Cargar paro (EPA)
+                const jsonParo = await cargarJson('4247.json');
+                jsonParo.forEach(serie => {
+                    const meta = {};
+                    (serie.MetaData || []).forEach(m => { meta[m.T3_Variable] = m.Nombre; });
+                    if (meta['Sexo'] === 'Ambos sexos' && meta['Totales de edad'] === 'Total') {
+                        const region = meta['Comunidades y Ciudades Autónomas'] || meta['Total Nacional'];
+                        if (region) {
+                            datosParo[region] = {};
+                            (serie.Data || []).forEach(d => {
+                                datosParo[region][d.Anyo + '-' + d.T3_Periodo] = d.Valor;
+                            });
+                        }
+                    }
+                });
+
+                // 3. Cargar renta municipal
+                const jsonRenta = await cargarJson('30824.json');
+                jsonRenta.forEach(item => {
+                    const munMeta = (item.MetaData || []).find(m => m.T3_Variable === 'Municipios');
+                    if (!munMeta || !item.Data || !item.Data.length) return;
+                    const dato = item.Data[0];
+                    if (dato.Valor === null || dato.Valor === undefined) return;
+                    if (dato.Notas && dato.Notas.length > 0) return;
+
+                    const cod = munMeta.Codigo || '';
+                    const codProv = cod.substring(0, 2);
+                    const infoProv = provincias[codProv];
+                    if (!infoProv) return;
+
+                    datosRenta.push({
+                        codigo: cod,
+                        nombre: munMeta.Nombre,
+                        prov: infoProv.prov,
+                        ccaa: infoProv.ccaa,
+                        zona: infoProv.zona,
+                        valor: dato.Valor
+                    });
+                });
+
+                // Dibujar los tres gráficos
+                dibujarPie('top6');
+                dibujarSmallMultiples('8');
+                dibujarBeeswarm(60);
+
+                alerta.className = 'alert alert-success py-2';
+                alerta.innerHTML = '<strong>Datos cargados correctamente:</strong> 3 datasets oficiales enlazados desde la carpeta <code>data/</code>.';
+
+                // Eventos de los desplegables
+                document.getElementById('filtro-pie').addEventListener('change', e => dibujarPie(e.target.value));
+                document.getElementById('filtro-sm').addEventListener('change', e => dibujarSmallMultiples(e.target.value));
+                document.getElementById('filtro-bee').addEventListener('change', e => dibujarBeeswarm(Number(e.target.value)));
+
+            } catch (err) {
+                alerta.className = 'alert alert-danger py-2';
+                alerta.innerHTML = '<strong>Error de lectura:</strong> ' + err.message + '. Asegúrate de tener los archivos en la carpeta <code>data/</code> y de servir la página con un servidor local.';
+                console.error(err);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', iniciar);
+    </script>
+</body>
+</html>
