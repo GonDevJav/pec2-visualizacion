@@ -45,6 +45,7 @@
                     <p class="mb-1"><strong>Fuente:</strong> <code>data/estructura-generacion.json</code> (Red Eléctrica de España, REData 2025). Sumatorio total anual: 272.321 GWh.</p>
                     <p class="mb-1"><strong>Enlace:</strong> <a href="https://www.ree.es/es/datos/generacion/estructura-generacion">https://www.ree.es/es/datos/generacion/estructura-generacion</a></p>
                     <p class="mb-0"><strong>Comentario:</strong> Para representar proporciones de un total, el gráfico circular funciona bien cuando el número de porciones es reducido. Como el dataset original desglosa hasta 16 tecnologías distintas (lo que provocaría sectores diminutos imposibles de comparar a simple vista), he mantenido las 5 tecnologías con mayor cuota y he agrupado las 11 restantes en una categoría de "Otras tecnologías". Se aprecia claramente que la energía eólica, nuclear y fotovoltaica cubren prácticamente el 60% de la demanda generada.</p>
+                    <p class="mb-0"><strong>Origen:</strong> Esta técnica fue introducida históricamente por William Playfair en 1801. </p>
                 </div>
 
                 <div class="row align-items-center mb-3">
@@ -74,6 +75,7 @@
                     <p class="mb-1"><strong>Fuente:</strong> <code>data/4247.json</code> (INE, Encuesta de Población Activa - EPA, trimestres 2021-T1 a 2023-T4).</p>
                     <p class="mb-1"><strong>Enlace:</strong> <a href="https://www.ine.es/jaxiT3/Datos.htm?t=4247">https://www.ine.es/jaxiT3/Datos.htm?t=4247</a></p>
                     <p class="mb-0"><strong>Comentario:</strong> Al comparar series temporales de muchas regiones a la vez, meter todas las líneas en un único gráfico genera el típico "gráfico de espagueti" donde no se distingue nada. Utilizando una rejilla de múltiplos pequeños (Small Multiples) con la misma escala fija en el eje Y (del 0% al 30%), se pueden comparar tendencias en paralelo. La línea discontinua gris muestra la media nacional como referencia. Podemos ver como destaca la fuerte estacionalidad de Baleares (dientes de sierra entre verano e invierno) y la estabilidad de Madrid y País Vasco con tasas muy por debajo de la media.</p>
+                    <p class="mb-0"><strong>Origen:</strong> Esta técnica fue bautizada y formalizada metodológicamente por Edward Tufte en 1990. </p>
                 </div>
 
                 <div class="row align-items-center mb-3">
@@ -103,6 +105,7 @@
                     <p class="mb-1"><strong>Fuente:</strong> <code>data/30824.json</code> (INE, Atlas de Distribución de Renta de los Hogares, 2024).</p>
                     <p class="mb-1"><strong>Enlace:</strong> <a href="https://www.ine.es/jaxiT3/Datos.htm?t=30824">https://www.ine.es/jaxiT3/Datos.htm?t=30824</a></p>
                     <p class="mb-0"><strong>Comentario:</strong> El dataset oficial del INE contiene los 8.139 municipios de España. De ellos, 8.052 cuentan con datos numéricos de renta y 6.713 disponen de una cifra individual propia (excluyendo secretos estadísticos y municipios de menos de 100 habitantes a los que se imputa la media comarcal agrupada). Para evitar el solapamiento masivo de miles de puntos en el Beeswarm Plot, se realiza un muestreo regular de puntos a lo largo de toda la distribución ordenada que conserva los extremos reales (mínimos y máximos) y preserva el perfil de densidad y concentración central de cada zona geográfica.</p>
+                    <p class="mb-0"><strong>Origen:</strong> Es una técnica moderna que ha evolucionado de los diagramas de puntos.  </p>
                 </div>
 
                 <div class="row align-items-center mb-3">
